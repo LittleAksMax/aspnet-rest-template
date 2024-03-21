@@ -17,20 +17,32 @@ public class DbInitialiser
 
         // create movies table if it doesn't already exist
         await connection.ExecuteAsync("""
-                                      CREATE TABLE IF NOT EXISTS movies (
-                                             id UUID primary key,
-                                             slug TEXT NOT NULL,
-                                             title TEXT NOT NULL,
-                                             autorelease INTEGER NOT NULL);
-                                      """);
+          CREATE TABLE IF NOT EXISTS movies (
+                 id UUID PRIMARY KEY,
+                 slug TEXT NOT NULL,
+                 title TEXT NOT NULL,
+                 yearofrelease INTEGER NOT NULL);
+          """);
         
         // create unique index on slug since it will make searching more efficient
         await connection.ExecuteAsync("""
-                                      CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS movies_slug_idx
-                                      ON movies
-                                      using btree(slug);
-                                      """);
+            CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS movies_slug_idx
+            ON movies
+            USING btree(slug);
+          """);
         
         
+        // create genres table
+        await connection.ExecuteAsync("""
+            CREATE TABLE IF NOT EXISTS genres (
+                movieid UUID,
+                name TEXT NOT NULL,
+                PRIMARY KEY (movieid, name),
+                CONSTRAINT fk_movieid
+                    FOREIGN KEY (movieid)
+                    REFERENCES movies (id)
+                    ON DELETE CASCADE
+            );
+          """);
     }
 }
