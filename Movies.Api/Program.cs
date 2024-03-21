@@ -1,9 +1,42 @@
 using System.Diagnostics;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Movies.Api.Middleware;
 using Movies.Application;
 using Movies.Application.Database;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add JWT
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
+Debug.Assert(jwtKey is not null);
+Debug.Assert(jwtIssuer is not null);
+Debug.Assert(jwtAudience is not null);
+
+builder.Services.AddAuthentication(x =>
+{
+    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(x =>
+{
+    x.TokenValidationParameters = new TokenValidationParameters
+    {
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+        ValidateIssuerSigningKey = true, // actually validate the tokens
+        ValidateLifetime = true, // don't allow expired tokens
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        ValidateIssuer = true, // make sure issuer of token matches
+        ValidateAudience = true // make sure audience to token matches
+    };
+});
+
+// Add authorisation
+builder.Services.AddAuthorization();
 
 // Add controllers
 builder.Services.AddControllers();
@@ -32,6 +65,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Use authentication and authorisation
+app.UseAuthentication();
 app.UseAuthorization();
 
 // Add validation middleware
