@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Movies.Api.Constants;
 using Movies.Api.Middleware;
 using Movies.Application;
 using Movies.Application.Database;
@@ -36,7 +37,16 @@ builder.Services.AddAuthentication(x =>
 });
 
 // Add authorisation
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(x =>
+{
+    x.AddPolicy(AuthConstants.AdminPolicyName, p => p.RequireClaim(AuthConstants.AdminClaimName, "true"));
+    x.AddPolicy(AuthConstants.TrustedMemberPolicyName, p =>
+        p.RequireAssertion(c =>
+            c.User.HasClaim(m =>
+                m is { Type: AuthConstants.AdminClaimName, Value: "true" }) || 
+            c.User.HasClaim(m => m is { Type: AuthConstants.TrustedMemberClaimName, Value: "true" })
+            ));
+});
 
 // Add controllers
 builder.Services.AddControllers();
