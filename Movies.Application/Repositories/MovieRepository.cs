@@ -155,12 +155,6 @@ public class MovieRepository : IMovieRepository
 
     public async Task<bool> UpdateAsync(Movie movie)
     {
-        // can't update if it doesn't exist
-        if (!await ExistsByIdAsync(movie.Id))
-        {
-            return false;
-        }
-        
         // full update on record if it does exist.
         using var connection = await _connectionFactory.CreateConnectionAsync();
         var transaction = connection.BeginTransaction();
@@ -202,10 +196,10 @@ public class MovieRepository : IMovieRepository
         result = await connection.ExecuteAsync(
             new CommandDefinition("""
                   UPDATE movies
-                  SET title=@Title,
-                      slug=@Slug,
-                      yearofrelease=@YearOfRelease
-                  WHERE id=@Id;
+                  SET title = @Title,
+                      slug = @Slug,
+                      yearofrelease = @YearOfRelease
+                  WHERE id = @Id;
                   """, movie));
 
         if (result != 1)

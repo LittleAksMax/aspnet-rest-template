@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Movies.Api.Middleware;
 using Movies.Application;
 using Movies.Application.Database;
 
@@ -32,6 +33,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+// Add validation middleware
+app.UseMiddleware<ValidationMappingMiddleware>();
 
 app.MapControllers();
 

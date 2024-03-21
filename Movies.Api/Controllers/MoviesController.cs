@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Movies.Api.Mappers;
-using Movies.Application.Repositories;
+using Movies.Application.Services;
 using Movies.Contracts.Requests;
 using Movies.Contracts.Responses;
 
@@ -9,19 +9,19 @@ namespace Movies.Api.Controllers;
 [ApiController]
 public class MoviesController : ControllerBase
 {
-    private readonly IMovieRepository _movieRepo;
+    private readonly IMovieService _movieService;
 
-    public MoviesController(IMovieRepository movieRepo)
+    public MoviesController(IMovieService movieService)
     {
-        _movieRepo = movieRepo;
+        _movieService = movieService;
     }
 
     [HttpGet(ApiRoutes.Movies.Get)]
     public async Task<IActionResult> Get([FromRoute] string idOrSlug)
     {
         var movie = Guid.TryParse(idOrSlug, out var id)
-            ? await _movieRepo.GetByIdAsync(id)
-            : await _movieRepo.GetBySlugAsync(idOrSlug);
+            ? await _movieService.GetByIdAsync(id)
+            : await _movieService.GetBySlugAsync(idOrSlug);
         if (movie is null)
         {
             return NotFound();
@@ -33,7 +33,7 @@ public class MoviesController : ControllerBase
     [HttpGet(ApiRoutes.Movies.GetAll)]
     public async Task<IActionResult> GetAll()
     {
-        var movies = await _movieRepo.GetAllAsync();
+        var movies = await _movieService.GetAllAsync();
         return Ok(new MoviesResponse { Movies = movies.Select(m => m.MapToMovieResponse()) });
     }
 
@@ -41,7 +41,7 @@ public class MoviesController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateMovieRequest request)
     {
         var movie = request.MapToMovie();
-        await _movieRepo.CreateAsync(movie);
+        await _movieService.CreateAsync(movie);
         return CreatedAtAction(nameof(Get), new { idOrSlug = movie.Id }, movie);
     }
 
@@ -49,19 +49,19 @@ public class MoviesController : ControllerBase
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateMovieRequest request)
     {
         var movie = request.MapToMovie(id);
-        var successfullyUpdated = await _movieRepo.UpdateAsync(movie);
-        if (!successfullyUpdated)
+        var updatedMovie = await _movieService.UpdateAsync(movie);
+        if (updatedMovie is null)
         {
             return NotFound();
         }
 
-        return Ok();
+        return Ok(updatedMovie);
     }
 
     [HttpDelete(ApiRoutes.Movies.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id)
     {
-        var successfullyDeleted = await _movieRepo.DeleteById(id);
+        var successfullyDeleted = await _movieService.DeleteById(id);
         if (!successfullyDeleted)
         {
             return NotFound();
