@@ -41,11 +41,13 @@ public class MoviesController : ControllerBase
 
     [Authorize]
     [HttpGet(ApiRoutes.Movies.GetAll)]
-    public async Task<IActionResult> GetAll(CancellationToken token)
+    public async Task<IActionResult> GetAll([FromQuery] GetAllMoviesRequest query, CancellationToken token)
     {
         var userId = HttpContext.GetUserId();
-
-        var movies = await _movieService.GetAllAsync(userId, token);
+        var options = query.MapToOptions()
+            .WithUser(userId);
+        
+        var movies = await _movieService.GetAllAsync(options, token);
         return Ok(new MoviesResponse { Movies = movies.Select(m => m.MapToMovieResponse()) });
     }
 

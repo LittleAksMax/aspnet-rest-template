@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Dapper;
 using Movies.Application.Database;
 using Movies.Application.Models;
+using Movies.Application.Models.Options;
 
 namespace Movies.Application.Repositories;
 
@@ -153,7 +154,7 @@ public class MovieRepository : IMovieRepository
         return result == 1;
     }
     
-    public async Task<IEnumerable<Movie>> GetAllAsync(Guid? userId = default, CancellationToken token = default)
+    public async Task<IEnumerable<Movie>> GetAllAsync(GetAllMoviesOptions options, CancellationToken token = default)
     {
         using var connection = await _connectionFactory.CreateConnectionAsync(token);
         var movies = await connection.QueryAsync(
@@ -161,12 +162,14 @@ public class MovieRepository : IMovieRepository
               SELECT m.*,
                      string_agg(distinct g.name, ',') as "genres",
                      round(avg(r.rating), 1) AS "rating",
-                     (SELECT myr.rating FROM ratings myr WHERE myr.movieid = m."id" AND myr.userid = @userId) AS "userrating"
+                     (SELECT myr.rating FROM ratings myr WHERE myr.movieid = m."id" AND myr.userid = @UserId) AS "userrating"
               FROM movies m
               LEFT JOIN genres g ON g.movieid = m."id"
               LEFT JOIN ratings r ON r.movieid = m."id"
+                WHERE (@Title IS NULL OR m.title LIKE ('%' || @Title || '%')) AND
+                      (@YearOfRelease IS NULL OR m.yearofrelease = @YearOfRelease)
               GROUP BY "id";
-              """, new { userId }, cancellationToken: token));
+              """, options, cancellationToken: token));
         return movies.Select(m => new Movie
         {
             Id = m.id,
