@@ -41,4 +41,17 @@ public static class ContractMapping
             Genres = movie.Genres
         };
     }
+
+    public static MovieRatingsResponse MapToMovieRatingResponse(this IEnumerable<MovieRating> ratings)
+    {
+        return new MovieRatingsResponse
+        {
+            Ratings = ratings.Select(x => new MovieRatingResponse
+            {
+                MovieId = x.MovieId,
+                Slug = x.Slug,
+                Rating = x.Rating
+            })
+        };
+    }
 }
