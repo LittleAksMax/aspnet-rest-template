@@ -44,5 +44,19 @@ public class DbInitialiser
                     ON DELETE CASCADE
             );
           """);
+
+        // create ratings table
+        await connection.ExecuteAsync("""
+          CREATE TABLE IF NOT EXISTS ratings (
+              userid UUID,
+              movieid UUID,
+              rating INTEGER NOT NULL,
+              PRIMARY KEY (userid, movieid),
+              CONSTRAINT fk_movieid
+                   FOREIGN KEY (movieid)
+                   REFERENCES movies (id)
+                   ON DELETE CASCADE
+          );
+          """);
     }
 }

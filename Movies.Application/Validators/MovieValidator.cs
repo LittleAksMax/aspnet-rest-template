@@ -32,7 +32,7 @@ public class MovieValidator : AbstractValidator<Movie>
 
     private async Task<bool> ValidateSlug(Movie movie, string slug, CancellationToken token)
     {
-        var existingMovie = await _movieRepository.GetBySlugAsync(slug);
+        var existingMovie = await _movieRepository.GetBySlugAsync(slug, token: token);
         
         // if already in the database, then it must the same movie (update operation)
         // so we need to compare IDs

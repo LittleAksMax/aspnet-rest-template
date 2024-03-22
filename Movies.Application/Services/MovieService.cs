@@ -7,36 +7,38 @@ namespace Movies.Application.Services;
 public class MovieService : IMovieService
 {
     private readonly IMovieRepository _movieRepo;
+    private readonly IRatingRepository _ratingRepo;
     private readonly IValidator<Movie> _movieValidator;
 
-    public MovieService(IMovieRepository movieRepo, IValidator<Movie> movieValidator)
+    public MovieService(IMovieRepository movieRepo, IRatingRepository ratingRepo, IValidator<Movie> movieValidator)
     {
         _movieRepo = movieRepo;
         _movieValidator = movieValidator;
+        _ratingRepo = ratingRepo;
     }
 
-    public async Task<bool> CreateAsync(Movie movie, CancellationToken token = default)
+    public async Task<bool> CreateAsync(Movie movie, Guid? userId = default, CancellationToken token = default)
     {
         await _movieValidator.ValidateAndThrowAsync(movie, token);
-        return await _movieRepo.CreateAsync(movie, token);
+        return await _movieRepo.CreateAsync(movie, userId, token);
     }
 
-    public async Task<Movie?> GetByIdAsync(Guid id, CancellationToken token = default)
+    public async Task<Movie?> GetByIdAsync(Guid id, Guid? userId = default, CancellationToken token = default)
     {
-        return await _movieRepo.GetByIdAsync(id, token);
+        return await _movieRepo.GetByIdAsync(id, userId, token);
     }
 
-    public async Task<Movie?> GetBySlugAsync(string slug, CancellationToken token = default)
+    public async Task<Movie?> GetBySlugAsync(string slug, Guid? userId = default, CancellationToken token = default)
     {
-        return await _movieRepo.GetBySlugAsync(slug, token);
+        return await _movieRepo.GetBySlugAsync(slug, userId, token);
     }
 
-    public async Task<IEnumerable<Movie>> GetAllAsync(CancellationToken token = default)
+    public async Task<IEnumerable<Movie>> GetAllAsync(Guid? userId = default, CancellationToken token = default)
     {
-        return await _movieRepo.GetAllAsync(token);
+        return await _movieRepo.GetAllAsync(userId, token);
     }
 
-    public async Task<Movie?> UpdateAsync(Movie movie, CancellationToken token = default)
+    public async Task<Movie?> UpdateAsync(Movie movie, Guid? userId = default, CancellationToken token = default)
     {
         await _movieValidator.ValidateAndThrowAsync(movie, token);
 
@@ -50,6 +52,20 @@ public class MovieService : IMovieService
         if (!updated)
         {
             return null;
+        }
+
+        // we can only add the user-specific data if we were passed
+        // the user ID
+        if (!userId.HasValue)
+        {
+            var rating = await _ratingRepo.GetRatingAsync(movie.Id, token);
+            movie.Rating = rating;
+        }
+        else
+        {
+            var ratings = await _ratingRepo.GetRatingAsync(movie.Id, userId.Value, token);
+            movie.Rating = ratings.Rating;
+            movie.UserRating = ratings.UserRating;
         }
         
         return movie;

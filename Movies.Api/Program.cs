@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Movies.Api.Constants;
+using Movies.Api.Auth.Constants;
 using Movies.Api.Middleware;
 using Movies.Application;
 using Movies.Application.Database;
