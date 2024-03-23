@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Movies.Api.Auth.Constants;
+using Movies.Api.Health;
 using Movies.Api.Middleware;
 using Movies.Api.Services;
 using Movies.Api.Swagger;
@@ -13,6 +14,10 @@ using Movies.Application.Database;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add health checks
+builder.Services.AddHealthChecks()
+    .AddCheck<DatabaseHealthCheck>(DatabaseHealthCheck.Name);
 
 // Add JWT
 var jwtKey = builder.Configuration["Jwt:Key"];
@@ -96,6 +101,10 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+// Add endpoint to display health diagnostics
+app.MapHealthChecks("_health");
+
+// Redirect traffic to HTTPS
 app.UseHttpsRedirection();
 
 // Use authentication and authorisation
