@@ -1,5 +1,5 @@
 using FluentValidation;
-using Movies.Contracts.Requests.Queries.Queries.Application.Services;
+using Movies.Application.Services;
 using Movies.Application.Models;
 using Movies.Application.Repositories;
 

@@ -2,7 +2,7 @@ using FluentValidation;
 using Movies.Application.Models;
 using Movies.Application.Repositories;
 
-namespace Movies.Contracts.Requests.Queries.Queries.Application.Services;
+namespace Movies.Application.Services;
 
 public class RatingService : IRatingService
 {

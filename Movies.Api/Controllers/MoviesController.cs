@@ -1,17 +1,18 @@
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Movies.Api.Auth.Extensions;
 using Movies.Api.Mappers;
 using Movies.Api.Auth.Constants;
 using Movies.Api.Services;
-using Movies.Contracts.Requests.Queries.Queries.Application.Services;
+using Movies.Application.Services;
 using Movies.Contracts.Requests;
 using Movies.Contracts.Requests.Queries;
 
 namespace Movies.Api.Controllers;
 
-[Authorize]
 [ApiController]
+[ApiVersion(1.0)]
 public class MoviesController : ControllerBase
 {
     private readonly IMovieService _movieService;
@@ -63,7 +64,7 @@ public class MoviesController : ControllerBase
         
         return Ok(response);
     }
-
+    
     [Authorize(AuthConstants.AdminPolicyName)]
     [HttpPost(ApiRoutes.Movies.Create)]
     public async Task<IActionResult> Create([FromBody] CreateMovieRequest request, CancellationToken token)

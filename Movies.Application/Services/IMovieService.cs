@@ -1,7 +1,7 @@
 using Movies.Application.Models;
 using Movies.Application.Models.Options;
 
-namespace Movies.Contracts.Requests.Queries.Queries.Application.Services;
+namespace Movies.Application.Services;
 
 public interface IMovieService
 {

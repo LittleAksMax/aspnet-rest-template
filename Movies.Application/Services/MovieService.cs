@@ -3,7 +3,7 @@ using Movies.Application.Models;
 using Movies.Application.Models.Options;
 using Movies.Application.Repositories;
 
-namespace Movies.Contracts.Requests.Queries.Queries.Application.Services;
+namespace Movies.Application.Services;
 
 public class MovieService : IMovieService
 {
