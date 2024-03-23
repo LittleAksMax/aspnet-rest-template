@@ -157,8 +157,21 @@ public class MovieRepository : IMovieRepository
     public async Task<IEnumerable<Movie>> GetAllAsync(GetAllMoviesOptions options, CancellationToken token = default)
     {
         using var connection = await _connectionFactory.CreateConnectionAsync(token);
+        
+        // we can only safely interpolate this into the query since we are validating the inputs in the service layer
+        var orderClause = string.Empty;
+        if (options.SortField is not null)
+        {
+            // this gets attached to the end of the 'group by' statement in the SQL query
+            orderClause = $"""
+                           , m.{options.SortField}
+                           ORDER BY m.{options.SortField} {(options.SortOrder == SortOrder.Ascending ? "ASC" : "DESC")}
+                           """;
+        }
+        
         var movies = await connection.QueryAsync(
-            new CommandDefinition("""
+            // we can only interpolate the orderClause because the inputs are validated at service layer
+            new CommandDefinition($"""
               SELECT m.*,
                      string_agg(distinct g.name, ',') as "genres",
                      round(avg(r.rating), 1) AS "rating",
@@ -168,7 +181,7 @@ public class MovieRepository : IMovieRepository
               LEFT JOIN ratings r ON r.movieid = m."id"
                 WHERE (@Title IS NULL OR m.title LIKE ('%' || @Title || '%')) AND
                       (@YearOfRelease IS NULL OR m.yearofrelease = @YearOfRelease)
-              GROUP BY "id";
+              GROUP BY "id"{orderClause};
               """, options, cancellationToken: token));
         return movies.Select(m => new Movie
         {
