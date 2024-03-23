@@ -1,9 +1,12 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Movies.Api.Auth.Extensions;
 using Movies.Api.Mappers;
 using Movies.Api.Auth.Constants;
+using Movies.Api.Auth.Filters;
+using Movies.Api.Caching;
 using Movies.Api.Services;
 using Movies.Application.Services;
 using Movies.Contracts.Requests;
@@ -20,16 +23,19 @@ public class MoviesController : ControllerBase
     private readonly IMovieService _movieService;
     private readonly IRatingService _ratingService;
     private readonly IUriService _uriService;
+    private readonly IOutputCacheStore _cacheStore;
     
-    public MoviesController(IMovieService movieService, IRatingService ratingService, IUriService uriService)
+    public MoviesController(IMovieService movieService, IRatingService ratingService, IUriService uriService, IOutputCacheStore cacheStore)
     {
         _movieService = movieService;
         _ratingService = ratingService;
         _uriService = uriService;
+        _cacheStore = cacheStore;
     }
 
-    [Authorize]
+    [ServiceFilter(typeof(ApiKeyAuthFilter))]
     [HttpGet(ApiRoutes.Movies.Get)]
+    // [ResponseCache(Duration = 30, VaryByHeader = "Accept, Accept-Encoding", Location = ResponseCacheLocation.Any)]
     [ProducesResponseType(typeof(MovieResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get([FromRoute] string idOrSlug, CancellationToken token)
@@ -47,15 +53,16 @@ public class MoviesController : ControllerBase
         return Ok(movie.MapToMovieResponse());
     }
 
-    [Authorize]
     [HttpGet(ApiRoutes.Movies.GetAll)]
+    [OutputCache(PolicyName = CachingConstants.GetAllMoviePolicyName)]
+    // [ResponseCache(Duration = 30, VaryByQueryKeys = new[] {"title", "year", "sortBy", "page", "pageSize"}, VaryByHeader = "Accept, Accept-Encoding", Location = ResponseCacheLocation.Any)]
     [ProducesResponseType(typeof(MoviesResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll([FromQuery] GetAllMoviesQuery query, [FromQuery] PagedQuery paginationQuery, CancellationToken token)
     {
         var userId = HttpContext.GetUserId();
         var options = query.MapToOptions(paginationQuery)
             .WithUser(userId);
-        
+
         var movies = await _movieService.GetAllAsync(options, token);
         var movieCount = await _movieService.GetCountAsync(options.Title, options.YearOfRelease, token);
         
@@ -70,7 +77,7 @@ public class MoviesController : ControllerBase
         return Ok(response);
     }
     
-    [Authorize(AuthConstants.AdminPolicyName)]
+    [Authorize(AuthConstants.TrustedMemberPolicyName)]
     [HttpPost(ApiRoutes.Movies.Create)]
     [ProducesResponseType(typeof(MovieResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationFailureResponse), StatusCodes.Status400BadRequest)]
@@ -80,6 +87,10 @@ public class MoviesController : ControllerBase
 
         var movie = request.MapToMovie();
         await _movieService.CreateAsync(movie, userId, token);
+        
+        // invalidate cache for this after successful creation
+        await _cacheStore.EvictByTagAsync(CachingConstants.MoviesCacheTag, token);
+        
         return CreatedAtAction(nameof(Get), new { idOrSlug = movie.Id }, movie);
     }
 
@@ -99,10 +110,14 @@ public class MoviesController : ControllerBase
             return NotFound();
         }
 
+        // invalidate cache for this after successful creation
+        await _cacheStore.EvictByTagAsync(CachingConstants.MoviesCacheTag, token);
+        
         return Ok(updatedMovie);
     }
 
     [Authorize(AuthConstants.AdminPolicyName)]
+    [ServiceFilter(typeof(ApiKeyAuthFilter))]
     [HttpDelete(ApiRoutes.Movies.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -114,6 +129,9 @@ public class MoviesController : ControllerBase
             return NotFound();
         }
 
+        // invalidate cache for this after successful creation
+        await _cacheStore.EvictByTagAsync(CachingConstants.MoviesCacheTag, token);
+        
         return NoContent();
     }
 

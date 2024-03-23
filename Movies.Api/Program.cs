@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Movies.Api.Auth.Constants;
+using Movies.Api.Auth.Filters;
+using Movies.Api.Auth.Handlers;
+using Movies.Api.Caching;
 using Movies.Api.Health;
 using Movies.Api.Middleware;
 using Movies.Api.Services;
@@ -14,10 +17,6 @@ using Movies.Application.Database;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add health checks
-builder.Services.AddHealthChecks()
-    .AddCheck<DatabaseHealthCheck>(DatabaseHealthCheck.Name);
 
 // Add JWT
 var jwtKey = builder.Configuration["Jwt:Key"];
@@ -47,9 +46,13 @@ builder.Services.AddAuthentication(x =>
 });
 
 // Add authorisation
+var apiKey = builder.Configuration["ApiKey"];
+Debug.Assert(apiKey is not null);
+
 builder.Services.AddAuthorization(x =>
 {
-    x.AddPolicy(AuthConstants.AdminPolicyName, p => p.RequireClaim(AuthConstants.AdminClaimName, "true"));
+    x.AddPolicy(AuthConstants.AdminPolicyName, p =>
+        p.AddRequirements(new AdminAuthRequirement(apiKey)));
     x.AddPolicy(AuthConstants.TrustedMemberPolicyName, p =>
         p.RequireAssertion(c =>
             c.User.HasClaim(m =>
@@ -57,6 +60,9 @@ builder.Services.AddAuthorization(x =>
             c.User.HasClaim(m => m is { Type: AuthConstants.TrustedMemberClaimName, Value: "true" })
             ));
 });
+
+// Add API Key filter
+builder.Services.AddScoped<ApiKeyAuthFilter>();
 
 // Add versioning
 builder.Services.AddApiVersioning(x =>
@@ -70,12 +76,30 @@ builder.Services.AddApiVersioning(x =>
                                                           // in the request header
 }).AddMvc().AddApiExplorer();
 
-// Add Swagger for documentation
-builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
-builder.Services.AddSwaggerGen(x => x.OperationFilter<SwaggerDefaultValues>());
+// Add response caching
+// builder.Services.AddResponseCaching(); // client-side
+builder.Services.AddOutputCache(x =>
+{
+    // wherever I label that I want to use output caching, cache the response
+    x.AddBasePolicy(c => c.Cache());
+    x.AddPolicy(CachingConstants.GetAllMoviePolicyName, c =>
+        c.Cache()
+            .Expire(TimeSpan.FromMinutes(1))
+            .SetVaryByQuery(new[] { "title", "year", "sortBy", "page", "pageSize" })
+            .Tag(CachingConstants.MoviesCacheTag) // used for cache invalidation
+    );
+});
 
 // Add controllers
 builder.Services.AddControllers();
+
+// Add health checks
+builder.Services.AddHealthChecks()
+    .AddCheck<DatabaseHealthCheck>(DatabaseHealthCheck.Name);
+
+// Add Swagger for documentation
+builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+builder.Services.AddSwaggerGen(x => x.OperationFilter<SwaggerDefaultValues>());
 
 // Add business logic layer services
 builder.Services.AddSingleton<IUriService, UriService>();
@@ -110,6 +134,15 @@ app.UseHttpsRedirection();
 // Use authentication and authorisation
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Use response caching
+// app.UseCors(); // for cross-origin requests
+// make sure the UseCache statements are below the CORS statement
+// app.UseResponseCaching(); // client-side caching
+app.UseOutputCache(); // by default only 200 OK are cached
+                      // by default only GET and HEAD requests are cached
+                      // by default responses that set cookies are not cached
+                      // by default responses to authenticated requests are not cached (request headers are checked)
 
 // Add validation middleware
 app.UseMiddleware<ValidationMappingMiddleware>();
