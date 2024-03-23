@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Movies.Api.Auth.Extensions;
 using Movies.Api.Mappers;
 using Movies.Application.Services;
+using Movies.Contracts.Responses;
 
 namespace Movies.Api.Controllers;
 
@@ -20,6 +21,7 @@ public class RatingsController : ControllerBase
     
     [Authorize]
     [HttpGet(ApiRoutes.Ratings.GetAllRatings)]
+    [ProducesResponseType(typeof(MovieRatingsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllRatings(CancellationToken token)
     {
         var userId = HttpContext.GetUserId();

@@ -2,12 +2,15 @@ using System.Diagnostics;
 using System.Text;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Movies.Api.Auth.Constants;
 using Movies.Api.Middleware;
 using Movies.Api.Services;
+using Movies.Api.Swagger;
 using Movies.Contracts.Requests.Queries.Queries.Application;
 using Movies.Application.Database;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,15 +63,14 @@ builder.Services.AddApiVersioning(x =>
     x.ApiVersionReader = new MediaTypeApiVersionReader(); // where to get version from,
                                                           // this one gets it from the api-version parameter
                                                           // in the request header
-}).AddMvc();
+}).AddMvc().AddApiExplorer();
+
+// Add Swagger for documentation
+builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+builder.Services.AddSwaggerGen(x => x.OperationFilter<SwaggerDefaultValues>());
 
 // Add controllers
 builder.Services.AddControllers();
-
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 // Add business logic layer services
 builder.Services.AddSingleton<IUriService, UriService>();
@@ -85,7 +87,13 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(x =>
+    {
+        foreach (var desc in app.DescribeApiVersions())
+        {
+            x.SwaggerEndpoint($"/swagger/{desc.GroupName}/swagger.json", desc.GroupName);
+        }
+    });
 }
 
 app.UseHttpsRedirection();
