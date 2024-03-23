@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Movies.Api.Auth.Constants;
 using Movies.Api.Middleware;
+using Movies.Api.Services;
 using Movies.Contracts.Requests.Queries.Queries.Application;
 using Movies.Application.Database;
 
@@ -57,6 +58,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Add business logic layer services
+builder.Services.AddSingleton<IUriService, UriService>();
 builder.Services.AddApplication();
 
 // Add database connection

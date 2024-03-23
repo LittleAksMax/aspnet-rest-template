@@ -23,7 +23,7 @@ public class GetAllMoviesOptionsValidator : AbstractValidator<GetAllMoviesOption
             .GreaterThanOrEqualTo(1);
         RuleFor(x => x.PageSize)
             .NotEmpty()
-            .GreaterThanOrEqualTo(5)
+            .GreaterThanOrEqualTo(1)
             .LessThanOrEqualTo(25);
     }
 }

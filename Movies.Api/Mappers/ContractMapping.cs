@@ -44,7 +44,8 @@ public static class ContractMapping
         };
     }
 
-    public static MoviesResponse MapToMoviesResponse(this IEnumerable<Movie> movies, PagedQuery paginationQuery, int totalCount)
+    public static MoviesResponse MapToMoviesResponse(this IEnumerable<Movie> movies, PagedQuery paginationQuery, int totalCount,
+        string? prev, string? next)
     {
         return new MoviesResponse
         {
@@ -52,6 +53,8 @@ public static class ContractMapping
             Page = paginationQuery.Page,
             PageSize = paginationQuery.PageSize,
             Total = totalCount,
+            Prev = prev,
+            Next = next
         };
     }
 

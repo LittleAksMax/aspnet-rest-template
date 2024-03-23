@@ -3,11 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Movies.Api.Auth.Extensions;
 using Movies.Api.Mappers;
 using Movies.Api.Auth.Constants;
+using Movies.Api.Services;
 using Movies.Contracts.Requests.Queries.Queries.Application.Services;
 using Movies.Contracts.Requests;
 using Movies.Contracts.Requests.Queries;
-using Movies.Api;
-using Movies.Contracts.Responses;
 
 namespace Movies.Api.Controllers;
 
@@ -17,11 +16,13 @@ public class MoviesController : ControllerBase
 {
     private readonly IMovieService _movieService;
     private readonly IRatingService _ratingService;
-
-    public MoviesController(IMovieService movieService, IRatingService ratingService)
+    private readonly IUriService _uriService;
+    
+    public MoviesController(IMovieService movieService, IRatingService ratingService, IUriService uriService)
     {
         _movieService = movieService;
         _ratingService = ratingService;
+        _uriService = uriService;
     }
 
     [Authorize]
@@ -53,10 +54,12 @@ public class MoviesController : ControllerBase
         var movieCount = await _movieService.GetCountAsync(options.Title, options.YearOfRelease, token);
         
         // construct response
-        var response = movies.MapToMoviesResponse(paginationQuery, movieCount);
+        var prev = await _uriService.GetPrevPage(HttpContext, paginationQuery);
+        var next = await _uriService.GetNextPage(HttpContext, paginationQuery, movieCount);
+        var response = movies.MapToMoviesResponse(paginationQuery, movieCount, prev, next);
         
         // set relevant headers
-        HttpContext.Response.Headers.Add("X-Total-Count", movieCount.ToString());
+        HttpContext.Response.Headers.Append("X-Total-Count", movieCount.ToString());
         
         return Ok(response);
     }
