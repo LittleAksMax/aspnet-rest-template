@@ -1,6 +1,7 @@
 using Movies.Application.Models;
 using Movies.Application.Models.Options;
 using Movies.Contracts.Requests;
+using Movies.Contracts.Requests.Queries;
 using Movies.Contracts.Responses;
 
 namespace Movies.Api.Mappers;
@@ -43,6 +44,17 @@ public static class ContractMapping
         };
     }
 
+    public static MoviesResponse MapToMoviesResponse(this IEnumerable<Movie> movies, PagedQuery paginationQuery, int totalCount)
+    {
+        return new MoviesResponse
+        {
+            Movies = movies.Select(m => m.MapToMovieResponse()),
+            Page = paginationQuery.Page,
+            PageSize = paginationQuery.PageSize,
+            Total = totalCount,
+        };
+    }
+
     public static MovieRatingsResponse MapToMovieRatingResponse(this IEnumerable<MovieRating> ratings)
     {
         return new MovieRatingsResponse
@@ -56,7 +68,7 @@ public static class ContractMapping
         };
     }
 
-    public static GetAllMoviesOptions MapToOptions(this GetAllMoviesRequest query)
+    public static GetAllMoviesOptions MapToOptions(this GetAllMoviesQuery query, PagedQuery paginationQuery)
     {
         return new GetAllMoviesOptions
         {
@@ -64,7 +76,9 @@ public static class ContractMapping
             YearOfRelease = query.Year,
             SortField = query.SortBy?.Trim('+', '-'),
             SortOrder = query.SortBy is null ? SortOrder.Unordered
-                : (query.SortBy.StartsWith('-') ? SortOrder.Descending : SortOrder.Ascending)
+                : (query.SortBy.StartsWith('-') ? SortOrder.Descending : SortOrder.Ascending),
+            Page = paginationQuery.Page,
+            PageSize = paginationQuery.PageSize
         };
     }
 

@@ -3,7 +3,7 @@ using Movies.Application.Models;
 using Movies.Application.Models.Options;
 using Movies.Application.Repositories;
 
-namespace Movies.Application.Services;
+namespace Movies.Contracts.Requests.Queries.Queries.Application.Services;
 
 public class MovieService : IMovieService
 {
@@ -78,5 +78,10 @@ public class MovieService : IMovieService
     public async Task<bool> DeleteById(Guid id, CancellationToken token = default)
     {
         return await _movieRepo.DeleteById(id, token);
+    }
+
+    public async Task<int> GetCountAsync(string? title, int? yearOfRelease, CancellationToken token)
+    {
+        return await _movieRepo.GetCountAsync(title, yearOfRelease, token);
     }
 }

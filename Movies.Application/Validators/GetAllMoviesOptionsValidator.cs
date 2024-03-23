@@ -1,7 +1,7 @@
 using FluentValidation;
 using Movies.Application.Models.Options;
 
-namespace Movies.Application.Validators;
+namespace Movies.Contracts.Requests.Queries.Queries.Application.Validators;
 
 public class GetAllMoviesOptionsValidator : AbstractValidator<GetAllMoviesOptions>
 {
@@ -18,5 +18,11 @@ public class GetAllMoviesOptionsValidator : AbstractValidator<GetAllMoviesOption
         RuleFor(x => x.SortField)
             .Must(x => x is null || AllowedSortFields.Contains(x, StringComparer.Ordinal))
             .WithMessage("You can only sort by 'title' or 'yearofrelease'.");
+        RuleFor(x => x.Page)
+            .NotEmpty()
+            .GreaterThanOrEqualTo(1);
+        RuleFor(x => x.PageSize)
+            .NotEmpty()
+            .GreaterThanOrEqualTo(5);
     }
 }

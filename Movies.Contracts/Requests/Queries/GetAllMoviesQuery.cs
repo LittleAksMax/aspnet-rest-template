@@ -1,6 +1,6 @@
-namespace Movies.Contracts.Requests;
+namespace Movies.Contracts.Requests.Queries;
 
-public class GetAllMoviesRequest
+public class GetAllMoviesQuery
 {
     public required string? Title { get; init; }
     public required int? Year { get; init; }

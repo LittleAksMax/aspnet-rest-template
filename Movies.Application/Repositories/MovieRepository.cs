@@ -181,8 +181,17 @@ public class MovieRepository : IMovieRepository
               LEFT JOIN ratings r ON r.movieid = m."id"
                 WHERE (@Title IS NULL OR m.title LIKE ('%' || @Title || '%')) AND
                       (@YearOfRelease IS NULL OR m.yearofrelease = @YearOfRelease)
-              GROUP BY "id"{orderClause};
-              """, options, cancellationToken: token));
+              GROUP BY "id"{orderClause}
+              LIMIT @PageSize
+              OFFSET @PageOffset;
+              """, new
+            {
+                options.UserId,
+                options.Title,
+                options.YearOfRelease,
+                options.PageSize,
+                PageOffset = (options.Page - 1) * options.PageSize
+            }, cancellationToken: token));
         return movies.Select(m => new Movie
         {
             Id = m.id,
@@ -272,5 +281,16 @@ public class MovieRepository : IMovieRepository
         
         transaction.Commit();
         return true;
+    }
+
+    public async Task<int> GetCountAsync(string? title, int? yearOfRelease, CancellationToken token)
+    {
+        using var connection = await _connectionFactory.CreateConnectionAsync(token);
+        return await connection.ExecuteScalarAsync<int>(
+            new CommandDefinition("""
+                                  SELECT count(1) FROM movies
+                                  WHERE (@title IS NULL OR title LIKE ('%' || @title || '%')) AND
+                                        (@yearOfRelease IS NULL OR yearofrelease = @yearOfRelease);
+                                  """, new { title, yearOfRelease }));
     }
 }

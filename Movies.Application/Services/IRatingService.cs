@@ -1,6 +1,6 @@
 using Movies.Application.Models;
 
-namespace Movies.Application.Services;
+namespace Movies.Contracts.Requests.Queries.Queries.Application.Services;
 
 public interface IRatingService
 {

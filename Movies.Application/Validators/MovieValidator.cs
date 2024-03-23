@@ -1,9 +1,9 @@
 using FluentValidation;
+using Movies.Contracts.Requests.Queries.Queries.Application.Services;
 using Movies.Application.Models;
 using Movies.Application.Repositories;
-using Movies.Application.Services;
 
-namespace Movies.Application.Validators;
+namespace Movies.Contracts.Requests.Queries.Queries.Application.Validators;
 
 public class MovieValidator : AbstractValidator<Movie>
 {

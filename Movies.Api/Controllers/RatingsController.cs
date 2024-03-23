@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Movies.Api;
 using Movies.Api.Auth.Extensions;
 using Movies.Api.Mappers;
-using Movies.Application.Services;
+using Movies.Contracts.Requests.Queries.Queries.Application.Services;
 
 namespace Movies.Api.Controllers;
 

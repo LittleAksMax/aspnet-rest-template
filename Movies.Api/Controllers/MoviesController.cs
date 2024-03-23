@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Movies.Api.Auth.Constants;
 using Movies.Api.Auth.Extensions;
 using Movies.Api.Mappers;
-using Movies.Application.Services;
+using Movies.Api.Auth.Constants;
+using Movies.Contracts.Requests.Queries.Queries.Application.Services;
 using Movies.Contracts.Requests;
+using Movies.Contracts.Requests.Queries;
+using Movies.Api;
 using Movies.Contracts.Responses;
 
 namespace Movies.Api.Controllers;
@@ -41,14 +43,22 @@ public class MoviesController : ControllerBase
 
     [Authorize]
     [HttpGet(ApiRoutes.Movies.GetAll)]
-    public async Task<IActionResult> GetAll([FromQuery] GetAllMoviesRequest query, CancellationToken token)
+    public async Task<IActionResult> GetAll([FromQuery] GetAllMoviesQuery query, [FromQuery] PagedQuery paginationQuery, CancellationToken token)
     {
         var userId = HttpContext.GetUserId();
-        var options = query.MapToOptions()
+        var options = query.MapToOptions(paginationQuery)
             .WithUser(userId);
         
         var movies = await _movieService.GetAllAsync(options, token);
-        return Ok(new MoviesResponse { Movies = movies.Select(m => m.MapToMovieResponse()) });
+        var movieCount = await _movieService.GetCountAsync(options.Title, options.YearOfRelease, token);
+        
+        // construct response
+        var response = movies.MapToMoviesResponse(paginationQuery, movieCount);
+        
+        // set relevant headers
+        HttpContext.Response.Headers.Add("X-Total-Count", movieCount.ToString());
+        
+        return Ok(response);
     }
 
     [Authorize(AuthConstants.AdminPolicyName)]

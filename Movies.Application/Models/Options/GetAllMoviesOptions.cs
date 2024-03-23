@@ -7,4 +7,6 @@ public class GetAllMoviesOptions
     public Guid? UserId { get; set; }
     public string? SortField { get; set; }
     public SortOrder? SortOrder { get; set; }
+    public required int Page { get; init; }
+    public required int PageSize { get; init; }
 }

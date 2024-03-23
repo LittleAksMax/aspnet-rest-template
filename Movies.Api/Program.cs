@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Movies.Api.Auth.Constants;
 using Movies.Api.Middleware;
-using Movies.Application;
+using Movies.Contracts.Requests.Queries.Queries.Application;
 using Movies.Application.Database;
 
 var builder = WebApplication.CreateBuilder(args);
