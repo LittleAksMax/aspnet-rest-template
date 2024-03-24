@@ -1,5 +1,6 @@
 using Movies.Api.Auth.Extensions;
 using Movies.Api.Mappers;
+using Movies.Api.Versioning;
 using Movies.Application.Services;
 using Movies.Contracts.Responses;
 
@@ -20,7 +21,9 @@ public static class GetRatingsForUserEndpoint
             return Results.Ok(ratings.MapToMovieRatingResponse());
         })
             .RequireAuthorization()
-            .Produces<MovieRatingsResponse>(StatusCodes.Status200OK);
+            .Produces<MovieRatingsResponse>(StatusCodes.Status200OK)
+            .WithApiVersionSet(ApiVersioning.VersionSet)
+            .HasApiVersion(1.0);
         return app;
 
     }

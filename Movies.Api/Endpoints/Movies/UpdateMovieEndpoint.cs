@@ -3,6 +3,7 @@ using Movies.Api.Auth.Constants;
 using Movies.Api.Auth.Extensions;
 using Movies.Api.Caching;
 using Movies.Api.Mappers;
+using Movies.Api.Versioning;
 using Movies.Application.Services;
 using Movies.Contracts.Requests;
 using Movies.Contracts.Responses;
@@ -40,7 +41,9 @@ public static class UpdateMovieEndpoint
             .RequireAuthorization(AuthConstants.TrustedMemberPolicyName)
             .Produces<MovieResponse>(StatusCodes.Status200OK)
             .Produces<ValidationFailureResponse>(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status404NotFound)
+            .WithApiVersionSet(ApiVersioning.VersionSet)
+            .HasApiVersion(1.0);
         return app;
     }
 }

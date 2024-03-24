@@ -1,4 +1,5 @@
 using Movies.Api.Auth.Extensions;
+using Movies.Api.Versioning;
 using Movies.Application.Services;
 using Movies.Contracts.Requests;
 
@@ -29,7 +30,9 @@ public static class RateMovieEndpoint
         })
             .RequireAuthorization()
             .Produces(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status404NotFound)
+            .WithApiVersionSet(ApiVersioning.VersionSet)
+            .HasApiVersion(1.0);
         return app;
     }
 }

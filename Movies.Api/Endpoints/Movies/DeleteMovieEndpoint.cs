@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.OutputCaching;
 using Movies.Api.Auth.Constants;
 using Movies.Api.Caching;
+using Movies.Api.Versioning;
 using Movies.Application.Services;
 
 namespace Movies.Api.Endpoints.Movies;
@@ -29,7 +30,9 @@ public static class DeleteMovieEndpoint
         })
             .RequireAuthorization(AuthConstants.AdminPolicyName)
             .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status404NotFound)
+            .WithApiVersionSet(ApiVersioning.VersionSet)
+            .HasApiVersion(1.0);
         return app;
     }
 }

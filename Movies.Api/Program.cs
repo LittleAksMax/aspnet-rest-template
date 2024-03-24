@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Movies.Api.Extensions.Endpoints;
 using Movies.Api.Extensions.ServiceCollection;
 using Movies.Api.Middleware;
+using Movies.Api.Versioning;
 using Movies.Application.Database;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +24,9 @@ Debug.Assert(apiKey is not null);
 builder.Services.AddServices(jwtKey, jwtAudience, jwtIssuer, apiKey, connectionString);
 
 var app = builder.Build();
+
+// Add minimal API versioning
+app.CreateApiVersionSet();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

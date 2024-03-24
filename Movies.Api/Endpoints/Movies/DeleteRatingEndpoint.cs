@@ -1,4 +1,5 @@
 using Movies.Api.Auth.Extensions;
+using Movies.Api.Versioning;
 using Movies.Application.Services;
 
 namespace Movies.Api.Endpoints.Movies;
@@ -25,7 +26,9 @@ public static class DeleteRatingEndpoint
         })
             .RequireAuthorization()
             .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status404NotFound);;
+            .Produces(StatusCodes.Status404NotFound)
+            .WithApiVersionSet(ApiVersioning.VersionSet)
+            .HasApiVersion(1.0);
         return app;
     }
 }

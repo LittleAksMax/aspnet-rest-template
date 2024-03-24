@@ -1,5 +1,6 @@
 using Movies.Api.Auth.Extensions;
 using Movies.Api.Mappers;
+using Movies.Api.Versioning;
 using Movies.Application.Services;
 using Movies.Contracts.Responses;
 
@@ -7,7 +8,8 @@ namespace Movies.Api.Endpoints.Movies;
 
 public static class GetMovieEndpoint
 {
-    public const string Name = "GetMovie";
+    private const string Name = "GetMovie";
+    public const string NameV1 = $"{Name}V1";
 
     public static IEndpointRouteBuilder MapGetMovie(this IEndpointRouteBuilder app)
     {
@@ -30,9 +32,11 @@ public static class GetMovieEndpoint
 
                 return TypedResults.Ok(movie.MapToMovieResponse());
             })
-            .WithName(Name) // so it can be identified
+            .WithName(NameV1) // so it can be identified
             .Produces<MovieResponse>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status404NotFound)
+            .WithApiVersionSet(ApiVersioning.VersionSet)
+            .HasApiVersion(1.0);
         return app;
     }
 }

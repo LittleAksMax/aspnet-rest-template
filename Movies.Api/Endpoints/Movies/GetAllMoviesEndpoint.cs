@@ -1,6 +1,7 @@
 using Movies.Api.Auth.Extensions;
 using Movies.Api.Mappers;
 using Movies.Api.Services;
+using Movies.Api.Versioning;
 using Movies.Application.Services;
 using Movies.Contracts.Requests.Queries;
 using Movies.Contracts.Responses;
@@ -37,7 +38,9 @@ public static class GetAllMoviesEndpoint
         
             return TypedResults.Ok(response);
         })
-            .Produces<MoviesResponse>(StatusCodes.Status200OK);
+            .Produces<MoviesResponse>(StatusCodes.Status200OK)
+            .WithApiVersionSet(ApiVersioning.VersionSet)
+            .HasApiVersion(1.0);
         return app;
     }
 }
