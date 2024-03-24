@@ -5,6 +5,8 @@ using Movies.Api.Caching;
 using Movies.Api.Mappers;
 using Movies.Application.Services;
 using Movies.Contracts.Requests;
+using Movies.Contracts.Responses;
+using Movies.Contracts.Responses.Validation;
 
 namespace Movies.Api.Endpoints.Movies;
 
@@ -32,7 +34,9 @@ public static class CreateMovieEndpoint
             return TypedResults.CreatedAtRoute(movie.MapToMovieResponse(),
                 GetMovieEndpoint.Name, new { idOrSlug = movie.Id });
         })
-            .RequireAuthorization(AuthConstants.TrustedMemberPolicyName);
+            .RequireAuthorization(AuthConstants.TrustedMemberPolicyName)
+            .Produces<MovieResponse>(StatusCodes.Status201Created)
+            .Produces<ValidationFailureResponse>(StatusCodes.Status400BadRequest);
         return app;
     }
 }

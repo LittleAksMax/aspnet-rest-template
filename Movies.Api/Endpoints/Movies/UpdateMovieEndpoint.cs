@@ -5,6 +5,8 @@ using Movies.Api.Caching;
 using Movies.Api.Mappers;
 using Movies.Application.Services;
 using Movies.Contracts.Requests;
+using Movies.Contracts.Responses;
+using Movies.Contracts.Responses.Validation;
 
 namespace Movies.Api.Endpoints.Movies;
 
@@ -35,7 +37,10 @@ public static class UpdateMovieEndpoint
 
             return TypedResults.Ok(updatedMovie);
         })
-            .RequireAuthorization(AuthConstants.TrustedMemberPolicyName);
+            .RequireAuthorization(AuthConstants.TrustedMemberPolicyName)
+            .Produces<MovieResponse>(StatusCodes.Status200OK)
+            .Produces<ValidationFailureResponse>(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status404NotFound);
         return app;
     }
 }

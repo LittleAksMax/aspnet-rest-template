@@ -3,6 +3,7 @@ using Movies.Api.Mappers;
 using Movies.Api.Services;
 using Movies.Application.Services;
 using Movies.Contracts.Requests.Queries;
+using Movies.Contracts.Responses;
 
 namespace Movies.Api.Endpoints.Movies;
 
@@ -35,7 +36,8 @@ public static class GetAllMoviesEndpoint
             context.Response.Headers.Append("X-Total-Count", movieCount.ToString());
         
             return TypedResults.Ok(response);
-        });
+        })
+            .Produces<MoviesResponse>(StatusCodes.Status200OK);
         return app;
     }
 }

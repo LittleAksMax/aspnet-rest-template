@@ -96,6 +96,7 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddSwagger(this IServiceCollection services)
     {
+        services.AddEndpointsApiExplorer(); // for minimal API exploration
         services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
         services.AddSwaggerGen(x => x.OperationFilter<SwaggerDefaultValues>());
         return services;
@@ -112,7 +113,7 @@ public static class ServiceCollectionExtensions
             x.ApiVersionReader = new MediaTypeApiVersionReader(); // where to get version from,
             // this one gets it from the api-version parameter
             // in the request header
-        }).AddMvc().AddApiExplorer();
+        }).AddApiExplorer();
         return services;
     }
 

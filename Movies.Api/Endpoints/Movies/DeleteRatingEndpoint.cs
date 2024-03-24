@@ -23,7 +23,9 @@ public static class DeleteRatingEndpoint
             }
             return Results.NoContent();
         })
-            .RequireAuthorization();;
+            .RequireAuthorization()
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);;
         return app;
     }
 }
