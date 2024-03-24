@@ -136,7 +136,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // Use response caching
-// app.UseCors(); // for cross-origin requests
+app.UseCors(); // for cross-origin requests
 // make sure the UseCache statements are below the CORS statement
 // app.UseResponseCaching(); // client-side caching
 app.UseOutputCache(); // by default only 200 OK are cached

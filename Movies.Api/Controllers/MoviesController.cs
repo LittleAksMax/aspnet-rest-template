@@ -33,7 +33,6 @@ public class MoviesController : ControllerBase
         _cacheStore = cacheStore;
     }
 
-    [ServiceFilter(typeof(ApiKeyAuthFilter))]
     [HttpGet(ApiRoutes.Movies.Get)]
     // [ResponseCache(Duration = 30, VaryByHeader = "Accept, Accept-Encoding", Location = ResponseCacheLocation.Any)]
     [ProducesResponseType(typeof(MovieResponse), StatusCodes.Status200OK)]
