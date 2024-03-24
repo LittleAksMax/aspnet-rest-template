@@ -1,4 +1,5 @@
 using Movies.Api.Auth.Extensions;
+using Movies.Api.Caching;
 using Movies.Api.Mappers;
 using Movies.Api.Services;
 using Movies.Api.Versioning;
@@ -39,6 +40,7 @@ public static class GetAllMoviesEndpoint
             return TypedResults.Ok(response);
         })
             .Produces<MoviesResponse>(StatusCodes.Status200OK)
+            .CacheOutput(CachingConstants.GetAllMoviePolicyName)
             .WithApiVersionSet(ApiVersioning.VersionSet)
             .HasApiVersion(1.0);
         return app;
