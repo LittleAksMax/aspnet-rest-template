@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace Movies.Contracts.Requests.Queries.Queries.Application.Validators;
+namespace Movies.Application.Extensions.Validators;
 
 public class RatingValidator : AbstractValidator<float>
 {

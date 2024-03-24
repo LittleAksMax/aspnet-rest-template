@@ -50,8 +50,8 @@ public static class ContractMapping
         return new MoviesResponse
         {
             Movies = movies.Select(m => m.MapToMovieResponse()),
-            Page = paginationQuery.Page,
-            PageSize = paginationQuery.PageSize,
+            Page = paginationQuery.Page.GetValueOrDefault(PagedQuery.DefaultPage),
+            PageSize = paginationQuery.PageSize.GetValueOrDefault(PagedQuery.DefaultPageSize),
             Total = totalCount,
             Prev = prev,
             Next = next
@@ -80,8 +80,8 @@ public static class ContractMapping
             SortField = query.SortBy?.Trim('+', '-'),
             SortOrder = query.SortBy is null ? SortOrder.Unordered
                 : (query.SortBy.StartsWith('-') ? SortOrder.Descending : SortOrder.Ascending),
-            Page = paginationQuery.Page,
-            PageSize = paginationQuery.PageSize
+            Page = paginationQuery.Page.GetValueOrDefault(PagedQuery.DefaultPage),
+            PageSize = paginationQuery.PageSize.GetValueOrDefault(PagedQuery.DefaultPageSize)
         };
     }
 

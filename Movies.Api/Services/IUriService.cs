@@ -4,6 +4,6 @@ namespace Movies.Api.Services;
 
 public interface IUriService
 {
-    Task<string?> GetPrevPage(HttpContext context, PagedQuery paginationQuery);
-    Task<string?> GetNextPage(HttpContext context, PagedQuery paginationQuery, int totalCount);
+    Task<string?> GetPrevPage(HttpContext context, int page, int pageSize);
+    Task<string?> GetNextPage(HttpContext context, int page, int pageSize, int totalCount);
 }

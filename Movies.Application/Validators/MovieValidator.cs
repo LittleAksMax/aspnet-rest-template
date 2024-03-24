@@ -3,7 +3,7 @@ using Movies.Application.Services;
 using Movies.Application.Models;
 using Movies.Application.Repositories;
 
-namespace Movies.Contracts.Requests.Queries.Queries.Application.Validators;
+namespace Movies.Application.Extensions.Validators;
 
 public class MovieValidator : AbstractValidator<Movie>
 {

@@ -1,13 +1,12 @@
 using Microsoft.AspNetCore.WebUtilities;
-using Movies.Contracts.Requests.Queries;
 
 namespace Movies.Api.Services;
 
 public class UriService : IUriService
 {
-    public Task<string?> GetPrevPage(HttpContext context, PagedQuery paginationQuery)
+    public Task<string?> GetPrevPage(HttpContext context, int page, int pageSize)
     {
-        if (paginationQuery.Page == 1)
+        if (page == 1)
         {
             return Task.FromResult<string?>(null);
         }
@@ -16,8 +15,8 @@ public class UriService : IUriService
         var queries = new Dictionary<string, string?>
         {
             // add pagination query parameters first
-            { "page", (paginationQuery.Page - 1).ToString() },
-            { "pageSize", paginationQuery.PageSize.ToString() }
+            { "page", (page - 1).ToString() },
+            { "pageSize", pageSize.ToString() }
         };
 
         // add previous query parameters to preserve the request type
@@ -35,9 +34,9 @@ public class UriService : IUriService
         return Task.FromResult<string?>($"/{uri}");
     }
 
-    public Task<string?> GetNextPage(HttpContext context, PagedQuery paginationQuery, int totalCount)
+    public Task<string?> GetNextPage(HttpContext context, int page, int pageSize, int totalCount)
     {
-        if (paginationQuery.Page * paginationQuery.PageSize >= totalCount)
+        if (page * pageSize >= totalCount)
         {
             return Task.FromResult<string?>(null);
         }
@@ -46,8 +45,8 @@ public class UriService : IUriService
         var queries = new Dictionary<string, string?>
         {
             // add new pagination query parameters
-            { "page", (paginationQuery.Page + 1).ToString() },
-            { "pageSize", paginationQuery.PageSize.ToString() }
+            { "page", (page + 1).ToString() },
+            { "pageSize", pageSize.ToString() }
         };
 
         // add previous query parameters to preserve the request type

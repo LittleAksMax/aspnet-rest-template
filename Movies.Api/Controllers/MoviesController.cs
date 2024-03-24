@@ -58,22 +58,23 @@ public class MoviesController : ControllerBase
     [ProducesResponseType(typeof(MoviesResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll([FromQuery] GetAllMoviesQuery query, [FromQuery] PagedQuery paginationQuery, CancellationToken token)
     {
-        var userId = HttpContext.GetUserId();
-        var options = query.MapToOptions(paginationQuery)
-            .WithUser(userId);
-
-        var movies = await _movieService.GetAllAsync(options, token);
-        var movieCount = await _movieService.GetCountAsync(options.Title, options.YearOfRelease, token);
-        
-        // construct response
-        var prev = await _uriService.GetPrevPage(HttpContext, paginationQuery);
-        var next = await _uriService.GetNextPage(HttpContext, paginationQuery, movieCount);
-        var response = movies.MapToMoviesResponse(paginationQuery, movieCount, prev, next);
-        
-        // set relevant headers
-        HttpContext.Response.Headers.Append("X-Total-Count", movieCount.ToString());
-        
-        return Ok(response);
+        // var userId = HttpContext.GetUserId();
+        // var options = query.MapToOptions(paginationQuery)
+        //     .WithUser(userId);
+        //
+        // var movies = await _movieService.GetAllAsync(options, token);
+        // var movieCount = await _movieService.GetCountAsync(options.Title, options.YearOfRelease, token);
+        //
+        // // construct response
+        // var prev = await _uriService.GetPrevPage(HttpContext, paginationQuery);
+        // var next = await _uriService.GetNextPage(HttpContext, paginationQuery, movieCount);
+        // var response = movies.MapToMoviesResponse(paginationQuery, movieCount, prev, next);
+        //
+        // // set relevant headers
+        // HttpContext.Response.Headers.Append("X-Total-Count", movieCount.ToString());
+        //
+        // return Ok(response);
+        return null;
     }
     
     [Authorize(AuthConstants.TrustedMemberPolicyName)]
@@ -90,7 +91,7 @@ public class MoviesController : ControllerBase
         // invalidate cache for this after successful creation
         await _cacheStore.EvictByTagAsync(CachingConstants.MoviesCacheTag, token);
         
-        return CreatedAtAction(nameof(Get), new { idOrSlug = movie.Id }, movie);
+        return CreatedAtAction(nameof(Get), new { idOrSlug = movie.Id }, movie.MapToMovieResponse());
     }
 
     [Authorize(AuthConstants.TrustedMemberPolicyName)]

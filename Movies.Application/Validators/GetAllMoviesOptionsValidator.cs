@@ -1,7 +1,7 @@
 using FluentValidation;
 using Movies.Application.Models.Options;
 
-namespace Movies.Contracts.Requests.Queries.Queries.Application.Validators;
+namespace Movies.Application.Extensions.Validators;
 
 public class GetAllMoviesOptionsValidator : AbstractValidator<GetAllMoviesOptions>
 {

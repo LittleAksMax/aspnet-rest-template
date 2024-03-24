@@ -1,11 +1,11 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Movies.Application.Database;
+using Movies.Application.Extensions.Validators;
 using Movies.Application.Repositories;
 using Movies.Application.Services;
-using Movies.Contracts.Requests.Queries.Queries.Application.Validators;
 
-namespace Movies.Contracts.Requests.Queries.Queries.Application;
+namespace Movies.Application.Extensions;
 
 public static class ApplicationServiceCollectionExtension
 {
