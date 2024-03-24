@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.OutputCaching;
+using Movies.Api.Auth.Constants;
 using Movies.Api.Auth.Extensions;
 using Movies.Api.Caching;
 using Movies.Api.Mappers;
@@ -30,7 +31,8 @@ public static class CreateMovieEndpoint
             // return appropriate response
             return TypedResults.CreatedAtRoute(movie.MapToMovieResponse(),
                 GetMovieEndpoint.Name, new { idOrSlug = movie.Id });
-        });
+        })
+            .RequireAuthorization(AuthConstants.TrustedMemberPolicyName);
         return app;
     }
 }

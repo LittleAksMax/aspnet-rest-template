@@ -26,7 +26,8 @@ public static class RateMovieEndpoint
                 return Results.NotFound();
             }
             return Results.Ok();
-        });
+        })
+            .RequireAuthorization();
         return app;
     }
 }

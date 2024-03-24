@@ -22,7 +22,8 @@ public static class DeleteRatingEndpoint
                 return Results.NotFound();
             }
             return Results.NoContent();
-        });
+        })
+            .RequireAuthorization();;
         return app;
     }
 }

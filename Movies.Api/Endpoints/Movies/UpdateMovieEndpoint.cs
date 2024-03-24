@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.OutputCaching;
+using Movies.Api.Auth.Constants;
 using Movies.Api.Auth.Extensions;
 using Movies.Api.Caching;
 using Movies.Api.Mappers;
@@ -33,7 +34,8 @@ public static class UpdateMovieEndpoint
             await cacheStore.EvictByTagAsync(CachingConstants.MoviesCacheTag, token);
 
             return TypedResults.Ok(updatedMovie);
-        });
+        })
+            .RequireAuthorization(AuthConstants.TrustedMemberPolicyName);
         return app;
     }
 }
