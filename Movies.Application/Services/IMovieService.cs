@@ -1,15 +1,15 @@
-using Movies.Application.Models;
 using Movies.Application.Models.Options;
+using Movies.Contracts.Dtos;
 
 namespace Movies.Application.Services;
 
 public interface IMovieService
 {
-    Task<bool> CreateAsync(Movie movie, Guid? userId = default, CancellationToken token = default);
-    Task<Movie?> GetByIdAsync(Guid id, Guid? userId = default, CancellationToken token = default);
-    Task<Movie?> GetBySlugAsync(string slug, Guid? userId = default, CancellationToken token = default);
-    Task<IEnumerable<Movie>> GetAllAsync(GetAllMoviesOptions options, CancellationToken token = default);
-    Task<Movie?> UpdateAsync(Movie movie, Guid? userId = default, CancellationToken token = default);
+    Task<bool> CreateAsync(MovieDto movie, Guid? userId = default, CancellationToken token = default);
+    Task<MovieDto?> GetByIdAsync(Guid id, Guid? userId = default, CancellationToken token = default);
+    Task<MovieDto?> GetBySlugAsync(string slug, Guid? userId = default, CancellationToken token = default);
+    Task<IEnumerable<MovieDto>> GetAllAsync(GetAllMoviesOptions options, CancellationToken token = default);
+    Task<MovieDto?> UpdateAsync(MovieDto movie, Guid? userId = default, CancellationToken token = default);
     Task<bool> DeleteById(Guid id, CancellationToken token = default);
     Task<int> GetCountAsync(string? title, int? yearOfRelease, CancellationToken token);
 }

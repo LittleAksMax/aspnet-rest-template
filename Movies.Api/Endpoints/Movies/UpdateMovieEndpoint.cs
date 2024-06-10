@@ -26,7 +26,7 @@ public static class UpdateMovieEndpoint
         {
             var userId = context.GetUserId();
 
-            var movie = request.MapToMovie(id);
+            var movie = request.MapToMovieDto(id);
             var updatedMovie = await movieService.UpdateAsync(movie, userId, token);
             if (updatedMovie is null)
             {

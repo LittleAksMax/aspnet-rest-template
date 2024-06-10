@@ -25,7 +25,7 @@ public static class CreateMovieEndpoint
         {
             var userId = context.GetUserId();
 
-            var movie = request.MapToMovie();
+            var movie = request.MapToMovieDto();
             await movieService.CreateAsync(movie, userId, token);
 
             // invalidate cache for this after successful creation

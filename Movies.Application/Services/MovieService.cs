@@ -1,7 +1,9 @@
 using FluentValidation;
+using Movies.Application.Mappers;
 using Movies.Application.Models;
 using Movies.Application.Models.Options;
 using Movies.Application.Repositories;
+using Movies.Contracts.Dtos;
 
 namespace Movies.Application.Services;
 
@@ -20,39 +22,44 @@ public class MovieService : IMovieService
         _ratingRepo = ratingRepo;
     }
 
-    public async Task<bool> CreateAsync(Movie movie, Guid? userId = default, CancellationToken token = default)
+    public async Task<bool> CreateAsync(MovieDto movie, Guid? userId = default, CancellationToken token = default)
     {
-        await _movieValidator.ValidateAndThrowAsync(movie, token);
-        return await _movieRepo.CreateAsync(movie, userId, token);
+        var m = movie.ToDom();
+        await _movieValidator.ValidateAndThrowAsync(m, token);
+        return await _movieRepo.CreateAsync(m, userId, token);
     }
 
-    public async Task<Movie?> GetByIdAsync(Guid id, Guid? userId = default, CancellationToken token = default)
+    public async Task<MovieDto?> GetByIdAsync(Guid id, Guid? userId = default, CancellationToken token = default)
     {
-        return await _movieRepo.GetByIdAsync(id, userId, token);
+        var m = await _movieRepo.GetByIdAsync(id, userId, token);
+        return m?.ToDto();
     }
 
-    public async Task<Movie?> GetBySlugAsync(string slug, Guid? userId = default, CancellationToken token = default)
+    public async Task<MovieDto?> GetBySlugAsync(string slug, Guid? userId = default, CancellationToken token = default)
     {
-        return await _movieRepo.GetBySlugAsync(slug, userId, token);
+        var m = await _movieRepo.GetBySlugAsync(slug, userId, token);
+        return m?.ToDto();
     }
 
-    public async Task<IEnumerable<Movie>> GetAllAsync(GetAllMoviesOptions options, CancellationToken token = default)
+    public async Task<IEnumerable<MovieDto>> GetAllAsync(GetAllMoviesOptions options, CancellationToken token = default)
     {
         await _optionsValidator.ValidateAndThrowAsync(options, token);
-        return await _movieRepo.GetAllAsync(options, token);
+        var ms = await _movieRepo.GetAllAsync(options, token);
+        return ms.Select(m => m.ToDto());
     }
 
-    public async Task<Movie?> UpdateAsync(Movie movie, Guid? userId = default, CancellationToken token = default)
+    public async Task<MovieDto?> UpdateAsync(MovieDto movie, Guid? userId = default, CancellationToken token = default)
     {
-        await _movieValidator.ValidateAndThrowAsync(movie, token);
+        var m = movie.ToDom();
+        await _movieValidator.ValidateAndThrowAsync(m, token);
 
         // can't update if it doesn't exist
-        if (!await _movieRepo.ExistsByIdAsync(movie.Id, token))
+        if (!await _movieRepo.ExistsByIdAsync(m.Id, token))
         {
             return null;
         }
 
-        var updated = await _movieRepo.UpdateAsync(movie, token);
+        var updated = await _movieRepo.UpdateAsync(m, token);
         if (!updated)
         {
             return null;
@@ -62,17 +69,17 @@ public class MovieService : IMovieService
         // the user ID
         if (!userId.HasValue)
         {
-            var rating = await _ratingRepo.GetRatingAsync(movie.Id, token);
-            movie.Rating = rating;
+            var rating = await _ratingRepo.GetRatingAsync(m.Id, token);
+            m.Rating = rating;
         }
         else
         {
-            var ratings = await _ratingRepo.GetRatingAsync(movie.Id, userId.Value, token);
-            movie.Rating = ratings.Rating;
-            movie.UserRating = ratings.UserRating;
+            var ratings = await _ratingRepo.GetRatingAsync(m.Id, userId.Value, token);
+            m.Rating = ratings.Rating;
+            m.UserRating = ratings.UserRating;
         }
         
-        return movie;
+        return m.ToDto();
     }
 
     public async Task<bool> DeleteById(Guid id, CancellationToken token = default)
